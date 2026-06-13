@@ -25,8 +25,7 @@ export const jobSchema = new mongoose.Schema(
         },
         currency: { 
             type: String, 
-            required: true,
-            default: "USD"
+            required: true
         },
         isRemote: { 
             type: Boolean, 
@@ -58,6 +57,15 @@ export const jobSchema = new mongoose.Schema(
             type: String,
             enum: ["active", "inactive", "draft"],
             default: "active"
+        },
+        // companyId: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: "Company",
+        //     required: true,
+        // },
+        companyId: {
+            type: String,
+            required: true,
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,

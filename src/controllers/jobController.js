@@ -1,6 +1,6 @@
 import { Job } from '../models/jobModel.js';
 
-// add idea
+// add job
 export const addJob = async (req, res) => {
     try {
         const job = req.body;
@@ -8,6 +8,7 @@ export const addJob = async (req, res) => {
 
         const requiredFields = [
             "jobTitle",
+            "companyId",
             "category",
             "jobType",
             "salaryMin",
@@ -84,4 +85,21 @@ export const addJob = async (req, res) => {
             message: "Internal server error",
         });
     }
+};
+
+// get job
+export const getJobs = async (req, res) => {
+  try {
+    const { status, companyId } = req.query;
+    const query = { createdBy: req.user.id };
+
+    if (status) query.status = status;
+    if (companyId) query.companyId = companyId;
+
+    const result = await Job.find(query).sort({ createdAt: -1 });
+
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
 };
