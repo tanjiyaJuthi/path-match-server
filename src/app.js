@@ -1,12 +1,14 @@
 import dns from "node:dns";
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
+import cors from "cors";
 import 'dotenv/config';
 import express from "express";
-import cors from "cors";
 
 import { connectMongoose } from "./config/db.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import companyRoutes from "./routes/companyRoutes.js";
 
 const app = express();
 
@@ -25,7 +27,9 @@ await connectMongoose();
 // });
 
 // routes
-app.use("/api/job", jobRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/companies", companyRoutes);
 
 app.get("/", (req, res) => {
   res.send("API Running");
