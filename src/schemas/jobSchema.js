@@ -7,7 +7,7 @@ export const jobSchema = new mongoose.Schema(
             required: true,
             trim: true
         },
-        category: { 
+        jobCategory: { 
             type: String, 
             required: true 
         },
@@ -58,19 +58,14 @@ export const jobSchema = new mongoose.Schema(
             enum: ["active", "inactive", "draft"],
             default: "active"
         },
-        // companyId: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: "Company",
-        //     required: true,
-        // },
         companyId: {
-            type: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Company",
             required: true,
         },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true
         }
     },
     { timestamps: true }

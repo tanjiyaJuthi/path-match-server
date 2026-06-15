@@ -10,13 +10,11 @@ const jobRoutes = express.Router();
 
 jobRoutes.post(
     "/",
-    verifyToken,
     addJob
 );
 
 jobRoutes.get(
     "/",
-    verifyToken,
     getJobs
 );
 

@@ -1,20 +1,27 @@
 import { Job } from '../models/jobModel.js';
+import mongoose from "mongoose";
 
 // get job
 export const getJobs = async (req, res) => {
-  try {
-    const { status, companyId } = req.query;
-    const query = { createdBy: req.user.id };
+    try {
+        const { status, companyId } = req.query;
+        const query = {};
 
-    if (status) query.status = status;
-    if (companyId) query.companyId = companyId;
+        if (status) query.status = status;
+        if (companyId) query.companyId = companyId;
 
-    const result = await Job.find(query).sort({ createdAt: -1 });
+        const result = await Job.find(query).sort({ createdAt: -1 });
 
-    return res.status(200).json({ success: true, data: result });
-  } catch (error) {
-    return res.status(500).json({ success: false, message: "Server error" });
-  }
+        return res.status(200).json({
+            success: true,
+            data: result,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
 };
 
 // get job by id
@@ -51,26 +58,24 @@ export const getJobById = async (req, res) => {
 export const addJob = async (req, res) => {
     try {
         const job = req.body;
-        const userId = req.user.id;
 
         const requiredFields = [
             "jobTitle",
             "companyId",
-            "category",
+            "jobCategory",
             "jobType",
-            "salaryMin",
-            "salaryMax",
+            "minSalary",
+            "maxSalary",
             "currency",
             "deadline",
             "responsibilities",
             "requirements",
         ];
 
-        // validate required fields
         const missingFields = requiredFields.filter((field) => {
             const value = job?.[field];
 
-            return value === undefined || value === null || value.toString().trim() === "";
+            return value === undefined || value === null || value === "";
         });
 
         if (missingFields.length > 0) {
@@ -81,7 +86,6 @@ export const addJob = async (req, res) => {
         });
         }
 
-        // normalize salary values
         job.salaryMin = Number(job.salaryMin);
         job.salaryMax = Number(job.salaryMax);
 
@@ -95,28 +99,28 @@ export const addJob = async (req, res) => {
         if (job.salaryMin > job.salaryMax) {
         return res.status(400).json({
             success: false,
-            message: "Minimum salary cannot be greater than maximum salary",
+            message:
+            "Minimum salary cannot be greater than maximum salary",
         });
         }
 
-        // remote handling
-        const isRemote = Boolean(job.isRemote);
+        const isRemote = job.isRemote === true || job.isRemote === "true";
 
-        job.location = isRemote
-        ? "Remote"
-        : `${job.city || ""}, ${job.country || ""}`.trim();
+        if (!isRemote && !job.location) {
+            return res.status(400).json({
+                success: false,
+                message: "Location required for non-remote job",
+            });
+        }
 
-        // basic cleanup
-        job.responsibilities = job.responsibilities?.trim();
-        job.requirements = job.requirements?.trim();
-        job.benefits = job.benefits?.trim();
+        job.responsibilities = String(job.responsibilities || "").trim();
+        job.requirements = String(job.requirements || "").trim();
+        job.benefits = String(job.benefits || "").trim();
 
-        // create job
         const newJob = await Job.create({
             ...job,
             isRemote,
             status: job.status || "active",
-            createdBy: userId,
         });
 
         return res.status(201).json({
